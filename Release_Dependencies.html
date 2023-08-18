@@ -1,0 +1,310 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<!-- Copyright (c) 2011  Rally Software Development Corp.  All rights reserved -->
+<html>
+<head>
+    <title>Release Dependencies</title>
+    <meta name="Name" content="App: Release Dependencies"/>
+    <meta name="Version" content="2011.04.21"/>
+    <meta name="Vendor" content="Rally Software"/>
+<script src="https://code.highcharts.com/highcharts.js"></script>
+<script src="https://code.highcharts.com/modules/sankey.js"></script>
+<script src="https://code.highcharts.com/modules/arc-diagram.js"></script>
+<script src="https://code.highcharts.com/modules/accessibility.js"></script>
+
+<script type="text/javascript" src="/apps/1.33/sdk.js?apiVersion=1.29"></script>
+
+    <script type="text/javascript">
+
+    function ReleaseDependencies() {
+            var rallyDataSource;
+            var relDropdown;
+            var table;
+            var header;
+        
+            
+        		
+            function buildStoryTable() {
+/*
+                var tableConfig = {
+                    sortingEnabled : false,
+                    columnKeys     : [
+                        'PredFormattedID', 'PredName', 'PredProject', 'PredScheduleState', 'PredRelease',
+                        'FormattedID', 'Name', 'Project', 'ScheduleState', 'Release',
+                        'SuccFormattedID', 'SuccName', 'SuccProject', 'SuccScheduleState','SuccRelease' ],
+                    columnHeaders  : [
+                        'ID', 'Name', 'Project', 'Schedule<br>State','Release',
+                        'ID', 'Name', 'Project', 'Schedule<br>State','Release',
+                        'ID', 'Name', 'Project', 'Schedule<br>State','Release'],
+					columnWidths   : ['4%', '12%', '8%', '5%', '4%', '4%', '12%', '8%', '5%', '4%','4%', '12%', '8%', '5%', '5%']
+                };
+                table = new rally.sdk.ui.Table(tableConfig);
+  */
+  }
+        
+            function prepardata(results) {
+                // buildHeaders();
+                // buildStoryTable();
+                var sData = "";
+                var row = 0;
+                var aDependencies = [];
+                var aDependenciesSums = [];
+
+					console.log("results");
+					console.log(results);				
+				
+                for (var i = 0; i < results.stories.length; i++) {
+                    var preds = results.stories[i].Predecessors;
+                    var story = results.stories[i];
+                    var succs = results.stories[i].Successors;
+
+                    if (succs.length !== 0 || preds.length !== 0) {					
+
+//					console.log("story");
+//					console.log(story);
+//                    console.log("preds");
+//					console.log(preds);
+//                    console.log("succs");
+//                    console.log(succs);
+					if (preds){
+                            if (preds.length !== 0) {
+                                for (var pred = 0; pred < preds.length; pred++) {
+                                    if(story.Project.Name !== preds[pred].Project.Name ){
+                                        sData = sData + "Org Project.Name:" + story.Project.Name;
+                                        sData = sData + "Org Project.Name:" + preds[pred].Project.Name + "<br>";
+                                        aDependencies.push([ [[story.Project.Name]+[preds[pred].Project.Name]],[story.Project.Name],[preds[pred].Project.Name],1]);
+                                    }
+                                }
+                            }
+                        }
+                        if (succs){
+                            if (succs.length !== 0) {
+                                for (var succ = 0; succ < succs.length; succ++) {
+                                    if(story.Project.Name !== succs[succ].Project.Name ){
+                                        sData = sData + "Org Project.Name:" + story.Project.Name;
+                                        sData = sData + "Org Project.Name:" + succs[succ].Project.Name + "<br>";
+                                        aDependencies.push([ [[story.Project.Name]+[succs[succ].Project.Name]],[story.Project.Name],[succs[succ].Project.Name],1]);
+                                    }
+                                }
+                           // row = row + Math.max(preds.length, succs.length);
+                            }
+                            }
+                }
+//                header.display(document.getElementById('header'));
+//                table.display(document.getElementById('stories'));
+//						console.log("table");
+//						console.log(table);
+//						
+//						tableData = table.getItems();
+                    
+//						console.log("sData");
+//						console.log(sData);
+//						console.log("aDependencies");
+//						console.log(aDependencies);
+                    //Sort Array
+                    } //End for loop
+                
+                    aDependencies.sort(sortFunction);
+						console.log("aDependencies");
+						console.log(aDependencies);
+                    var sLastValue = ""
+                    var sCurrentValue = ""
+                    
+                    var iCount = 0;
+             if(aDependencies.length>0){  
+                    for (var x = 0; x < aDependencies.length; x++) {
+                        sCurrentValue = aDependencies[x][0].toString().trim();
+                        //response.substr(0, response.indexOf("<")).trim();
+                        
+                        if(x==0){
+                            console.log("sLastValue = sCurrentValue;")
+                            sLastValue = aDependencies[x][0].toString().trim();
+                        }
+//                        console.log('aDependencies[x][0,1,2]');
+//                        console.log(aDependencies[x][0]);
+//                        console.log(aDependencies[x][1]);
+//                        console.log(aDependencies[x][2]);
+                        
+                        console.log("x:" +x);
+                        console.log(sCurrentValue +' - '+ sLastValue + '-' + iCount);
+                        
+//                        console.log("sCurrentValue + sLastValue");
+//                        console.log(sCurrentValue +' - '+ sLastValue + '-' + iCount);
+
+                            if(sCurrentValue !== sLastValue){
+                                console.log("sCurrentValue !== sLastValue:" + iCount);
+//                                console.log("sCurrentValue + sLastValue + iCount");
+//                                console.log(sCurrentValue +' - '+ sLastValue + '-' + iCount);                                    
+                                    aDependenciesSums.push([aDependencies[x-1][1],aDependencies[x-1][2],iCount]);
+                                    iCount = 0;
+                            }else{
+                                console.log("sCurrentValue == sLastValue:" + iCount);
+//                                console.log("No new value:" +iCount);
+//                                console.log("sCurrentValue + sLastValue");
+//                                console.log(sCurrentValue +' - '+ sLastValue);
+                            }
+                            iCount = iCount + 1;
+                            sLastValue = aDependencies[x][0].toString().trim();
+                        
+                        // aDependenciesSums
+                    }
+                        if(iCount==0){
+                            aDependenciesSums.push([aDependencies[x-1][1],aDependencies[x-1][2],1]);
+                            }else{
+                            aDependenciesSums.push([aDependencies[x-1][1],aDependencies[x-1][2],iCount]);
+                            }
+            }
+                //       console.log("aDependenciesSums");
+                //       console.log(aDependenciesSums);        
+				    showgrid(aDependenciesSums);    
+                
+                
+                var sDetails = "";
+                var slast = "";
+                var sCurr = "";
+                var sExtraBreak = '';
+                
+                if(aDependenciesSums.length > 0){
+                    for (var f = 0; f < aDependenciesSums.length; f++)  
+                    {
+                        sCurr = aDependenciesSums[f][0].toString().trim();;
+                        if(f == 0){
+                          slast = aDependenciesSums[f][0].toString().trim();;
+                        }
+                        
+                        if(sCurr !== slast){
+                          sExtraBreak = '<br>';  
+                        } 
+                        sDetails = sDetails + sExtraBreak + aDependenciesSums[f][0] + " -> " +aDependenciesSums[f][1] + '(' + aDependenciesSums[f][2]+')<br>';
+                        
+                        slast = aDependenciesSums[f][0].toString().trim();;
+                        sExtraBreak = '';  
+                  
+                
+                    document.getElementById('details').innerHTML = '<i>' + sDetails + '</i>';
+                }
+            }
+            }
+//========
+                                        //used by the heatmap 
+                                function getPointCategoryName(point, dimension) {
+                                    var series = point.series,
+                                        isY = dimension === 'y',
+                                        axis = series[isY ? 'yAxis' : 'xAxis'];
+                                    return axis.categories[point[isY ? 'y' : 'x']];
+                                }
+
+                                //construct the heatmap with the data
+                                function showgrid(sdata){    
+                                    Highcharts.chart('container', {
+
+                                        colors: ['#293462', '#a64942', '#fe5f55', '#a696c8', '#5bd1d7', '#ff502f', '#004d61', '#ff8a5c', '#fff591', '#f5587b', '#fad3cf', '#a911f8', '#5BE7C4', '#266A2E', '#593E1A'],
+
+                                        title: {
+                                            text: 'Dependencies'
+                                        },
+
+                                        accessibility: {
+                                    //        description: 'Arc diagram chart with circles of different sizes along the X axis, and connections drawn as arcs between them. From the chart we can see that Paris is the city with the most connections to other cities.',
+                                    //        point: {
+                                    //            valueDescriptionFormat: 'Connection from {point.from} to {point.to}.'
+                                    //        }
+                                        },
+
+                                        series: [{
+                                            keys: ['from', 'to', 'weight'],
+                                            type: 'arcdiagram',
+                                            name: 'Dependencies connections',
+                                            linkWeight: 3,
+                                            centeredLinks: true,
+                                            dataLabels: {
+                                                rotation: 20,
+                                                y: 30,
+                                                align: 'left',
+                                                color: 'black'
+                                            },
+                                            offset: '65%',
+                                            data: sdata //[]
+                                        }]
+
+                                    });
+
+                                }
+//========        
+            function sortFunction(a, b) {
+                if (a[0] === b[0]) {
+                    return 0;
+                }
+                else {
+                    return (a[0] < b[0]) ? -1 : 1;
+                }
+            }
+        
+            function destroyTables() {
+                if (table) {
+                    table.destroy();
+                }
+        
+                if(header) {
+                    header.destroy();
+                }
+            }
+        
+            function onReleaseSelected() {
+                destroyTables();
+        
+                var queryConfig = {
+                    type : 'hierarchicalrequirement',
+                    key  : 'stories',
+                    fetch: 'Rank,FormattedID,Name,Predecessors,Successors,Project,ScheduleState,Release',
+                    query: '(Release.Name = "' + relDropdown.getSelectedName() + '")',
+                    order: 'Rank'
+                };
+                rallyDataSource.findAll(queryConfig, prepardata);
+            }
+        
+        
+            this.display = function() {
+                rallyDataSource = new rally.sdk.data.RallyDataSource('__WORKSPACE_OID__',
+                        '__PROJECT_OID__',
+                        '__PROJECT_SCOPING_UP__',
+                        '__PROJECT_SCOPING_DOWN__');
+                var relConfig = {};
+               // rally.sdk.ui.AppHeader.showPageTools(true);
+               // rally.sdk.ui.AppHeader.setHelpTopic("245");
+                relDropdown = new rally.sdk.ui.ReleaseDropdown(relConfig, rallyDataSource);
+                relDropdown.display(document.getElementById("releaseDiv"), onReleaseSelected);
+            };
+        }
+		
+    </script>
+
+    <style type="text/css">
+    #container {
+    height: 400px;
+    max-width: 800px;
+    margin: 0 auto;
+        }
+
+    </style>
+
+    <script type="text/javascript">
+        function onLoad() {
+            var releaseDependencies = new ReleaseDependencies();
+            releaseDependencies.display();
+        }
+        rally.addOnLoad(onLoad);
+    </script>
+</head>
+<body>
+
+<div id="releaseDiv"></div>
+<!-- <input type="button" value="Print" style="float: right;" onClick="exportData();"> 
+<br/><br/>-->
+
+<div id="DataTable">
+	<div id="header"></div>
+    <div id="container"></div>
+    <div id="details"></div>
+</div>
+</body>
+</html>
